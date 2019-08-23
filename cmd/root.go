@@ -17,8 +17,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/marijnkoesen/kubeconnect/k8s"
-	"github.com/marijnkoesen/kubeconnect/lib"
+	"kubeconnect/k8s"
+	"kubeconnect/lib"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

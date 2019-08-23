@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/marijnkoesen/kubeconnect/cmd"
+import "kubeconnect/cmd"
 
 func main() {
   cmd.Execute()
