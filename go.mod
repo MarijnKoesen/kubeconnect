@@ -1,4 +1,4 @@
-module github.com/marijnkoesen/kubeconnect
+module kubeconnect
 
 go 1.11
 
