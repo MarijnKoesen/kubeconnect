@@ -1,0 +1,14 @@
+language: go
+
+go:
+  - 1.11.5
+
+# Without this go11 modules will be disabled
+env:
+  - GO111MODULE=on
+
+# Disable the old go get way travis will still automatically do if you use 'language: go'
+install: true
+
+script:
+  - go build
