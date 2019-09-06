@@ -3,12 +3,23 @@ package k8s
 import (
 	"bytes"
 	"errors"
+	"kubeconnect/lib"
 	"os/exec"
 	"strings"
 )
 
 type Context struct {
 	Name   string
+}
+
+func ContextListItems(contexts []Context) ([]lib.ListItem) {
+	var items []lib.ListItem
+
+	for index, context := range contexts {
+		items = append(items, lib.ListItem{Number: index+1, Label: context.Name})
+	}
+
+	return items
 }
 
 func GetContexts() ([]Context,error) {

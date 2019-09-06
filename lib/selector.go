@@ -2,7 +2,6 @@ package lib
 
 import (
 	"errors"
-	"fmt"
 	"github.com/manifoldco/promptui"
 	"strings"
 )
@@ -12,13 +11,13 @@ type ListItem struct {
 	Label string
 }
 
-func SelectFromList(question string, items []ListItem) (int, error) {
+func SelectFromList(question string, selectedLabel string, items []ListItem) (int, error) {
 	prompt := promptui.Select{
 		Label: question,
 		Items: items,
 		Templates: &promptui.SelectTemplates{
 			Inactive: "{{ .Number }}) {{ .Label }}",
-			Selected: "Using: {{ .Label | cyan }}",
+			Selected: selectedLabel + ": {{ .Label | cyan }}",
 			Active:   "{{ .Number }}) ▸ {{ .Label | cyan }}",
 		},
 		Searcher: func(input string, index int) bool {
@@ -34,7 +33,6 @@ func SelectFromList(question string, items []ListItem) (int, error) {
 	i, _, err := prompt.Run()
 
 	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
 		return -1, errors.New("prompt failed")
 	}
 

@@ -17,11 +17,11 @@ package cmd
 
 import (
 	"fmt"
-	"kubeconnect/k8s"
-	"kubeconnect/lib"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"kubeconnect/k8s"
+	"kubeconnect/lib"
 	"os"
 )
 
@@ -39,64 +39,26 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-
-		// Get context
-		contexts, err := k8s.GetContexts()
-		var listItems []lib.ListItem
-		for index, item := range contexts {
-			listItems = append(listItems, lib.ListItem{Number: index + 1, Label: item.Name})
-		}
-		index, err := lib.SelectFromList("\033[38;5;3mWhat context do you want to connect to?\033[0m", listItems)
-
-		if err != nil {
-			fmt.Print(err.Error())
-			return
-		}
-		context := contexts[index]
-
-
-		// Get namespace
-		namespaces, err := k8s.GetNamespaces(context)
+		context, err := getContext()
 		if err != nil {
 			fmt.Print(err.Error())
 			return
 		}
 
-		var listItems2 []lib.ListItem
-		for index, item := range namespaces {
-			listItems2 = append(listItems2, lib.ListItem{Number: index + 1, Label: item.Name})
-		}
-		index2, err2 := lib.SelectFromList("\033[38;5;3mWhat namespace do you want to connect to?\033[0m", listItems2)
-
-		if err2 != nil {
-			fmt.Print(err2.Error())
-			return
-		}
-		namespace := namespaces[index2]
-
-
-		// Get pods
-		pods, err := k8s.GetPods(context, namespace)
+		namespace, err := getNamespace(context)
 		if err != nil {
 			fmt.Print(err.Error())
 			return
 		}
 
-		var listItems3 []lib.ListItem
-		for index, item := range pods {
-			listItems3 = append(listItems3, lib.ListItem{Number: index + 1, Label: item.Name})
-		}
-		index3, err3 := lib.SelectFromList("\033[38;5;3mWhat pod do you want to connect to?\033[0m", listItems3)
-
-		if err3 != nil {
-			fmt.Print(err3.Error())
+		pod, err := getPod(context, namespace)
+		if err != nil {
+			fmt.Print(err.Error())
 			return
 		}
-		pod := pods[index3]
-
 
 		// Connect
-		// kubectl exec -it -n instapro-master rabbitmq-556d8c78df-vwppc /bin/bash
+		// kubectl exec -it --context my-conext --namespace my-namespace my-pod /bin/sh
 
 		// Get the current working directory.
 		cwd, err := os.Getwd()
@@ -106,14 +68,14 @@ to quickly create a Cobra application.`,
 
 		// Transfer stdin, stdout, and stderr to the new process
 		// and also set target directory for the shell to start in.
-		pa := os.ProcAttr {
+		pa := os.ProcAttr{
 			Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
-			Dir: cwd,
+			Dir:   cwd,
 		}
 
 		proc, err := os.StartProcess(
 			"/usr/local/bin/kubectl",
-			[]string{"kubectl", "exec", "-it", "--namespace", namespace.Name, "--context", context.Name, pod.Name, "/bin/bash"}, &pa)
+			[]string{"kubectl", "exec", "-it", "--namespace", namespace.Name, "--context", context.Name, pod.Name, "/bin/sh"}, &pa)
 
 		if err != nil {
 			panic(err)
@@ -174,4 +136,56 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func getContext() (k8s.Context, error) {
+	contexts, err := k8s.GetContexts()
+	if err != nil {
+		return k8s.Context{}, err
+	}
+
+	index, err := lib.SelectFromList(
+		"\033[38;5;3mWhat context do you want to connect to?\033[0m",
+		"Context",
+		k8s.ContextListItems(contexts))
+
+	if err != nil {
+		return k8s.Context{}, err
+	}
+
+	return contexts[index], nil
+}
+
+func getNamespace(context k8s.Context) (k8s.Namespace, error) {
+	namespaces, err := k8s.GetNamespaces(context)
+	if err != nil {
+		return k8s.Namespace{}, err
+	}
+
+	index, err := lib.SelectFromList(
+		"\033[38;5;3mWhat namespace do you want to connect to?\033[0m",
+		"Namespace",
+		k8s.NamespaceListItems(namespaces))
+	if err != nil {
+		return k8s.Namespace{}, err
+	}
+
+	return namespaces[index], nil
+}
+
+func getPod(context k8s.Context, namespace k8s.Namespace) (k8s.Pod, error) {
+	pods, err := k8s.GetPods(context, namespace)
+	if err != nil {
+		return k8s.Pod{}, err
+	}
+
+	index, err := lib.SelectFromList(
+		"\033[38;5;3mWhat pod do you want to connect to?\033[0m",
+		"Pod",
+		k8s.PodListItems(pods))
+	if err != nil {
+		return k8s.Pod{}, err
+	}
+
+	return pods[index], nil
 }

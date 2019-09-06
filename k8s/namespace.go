@@ -3,12 +3,23 @@ package k8s
 import (
 	"bytes"
 	"errors"
+	"kubeconnect/lib"
 	"os/exec"
 	"strings"
 )
 
 type Namespace struct {
 	Name   string
+}
+
+func NamespaceListItems(namespaces []Namespace) ([]lib.ListItem) {
+	var items []lib.ListItem
+
+	for index, namespace := range namespaces {
+		items = append(items, lib.ListItem{Number: index+1, Label: namespace.Name})
+	}
+
+	return items
 }
 
 func GetNamespaces(context Context) ([]Namespace, error) {

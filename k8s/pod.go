@@ -3,12 +3,24 @@ package k8s
 import (
 	"bytes"
 	"errors"
+	"kubeconnect/lib"
 	"os/exec"
 	"strings"
 )
 
+
 type Pod struct {
 	Name   string
+}
+
+func PodListItems(pods []Pod) ([]lib.ListItem) {
+	var items []lib.ListItem
+
+	for index, pod := range pods {
+		items = append(items, lib.ListItem{Number: index+1, Label: pod.Name})
+	}
+
+	return items
 }
 
 func GetPods(context Context, namespace Namespace) ([]Pod, error) {
