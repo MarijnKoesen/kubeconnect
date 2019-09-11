@@ -10,15 +10,15 @@ import (
 
 // Namespace represents a Namespace in a Kubernetes cluster
 type Namespace struct {
-	Name   string
+	Name string
 }
 
 // NamespaceListItems Transforms a list of Namespaces to a list of ListItems to show in the Selector
-func NamespaceListItems(namespaces []Namespace) ([]lib.ListItem) {
+func NamespaceListItems(namespaces []Namespace) []lib.ListItem {
 	var items []lib.ListItem
 
 	for index, namespace := range namespaces {
-		items = append(items, lib.ListItem{Number: index+1, Label: namespace.Name})
+		items = append(items, lib.ListItem{Number: index + 1, Label: namespace.Name})
 	}
 
 	return items
@@ -26,15 +26,15 @@ func NamespaceListItems(namespaces []Namespace) ([]lib.ListItem) {
 
 // GetNamespaces returns all namespaces in a given Context
 func GetNamespaces(context Context) ([]Namespace, error) {
-	cmd := exec.Command("kubectl", "get", "ns", "--context", context.Name);
+	cmd := exec.Command("kubectl", "get", "ns", "--context", context.Name)
 
-	var stdout,stderr bytes.Buffer
+	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
 	err := cmd.Run()
 	if err != nil {
-		return nil,errors.New(stderr.String())
+		return nil, errors.New(stderr.String())
 	}
 
 	lines := strings.Split(strings.Trim(stdout.String(), "\n"), "\n")
@@ -47,5 +47,5 @@ func GetNamespaces(context Context) ([]Namespace, error) {
 		}
 	}
 
-	return namespaces,nil
+	return namespaces, nil
 }

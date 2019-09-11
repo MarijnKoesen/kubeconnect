@@ -9,7 +9,7 @@ import (
 // ListItem is a Item that can be displayed in the Selector as a selection item
 type ListItem struct {
 	Number int
-	Label string
+	Label  string
 }
 
 // SelectFromList Shows a shell based list Selector in which the user can select a ListItem

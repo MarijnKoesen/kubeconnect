@@ -10,31 +10,31 @@ import (
 
 // Context represents a Context in a Kubernetes Cluster
 type Context struct {
-	Name   string
+	Name string
 }
 
 // ContextListItems Transform a list of Contexts to a list of ListItems to show in the Selector
-func ContextListItems(contexts []Context) ([]lib.ListItem) {
+func ContextListItems(contexts []Context) []lib.ListItem {
 	var items []lib.ListItem
 
 	for index, context := range contexts {
-		items = append(items, lib.ListItem{Number: index+1, Label: context.Name})
+		items = append(items, lib.ListItem{Number: index + 1, Label: context.Name})
 	}
 
 	return items
 }
 
 // GetContexts returns all configured Contexts in kubectl
-func GetContexts() ([]Context,error) {
+func GetContexts() ([]Context, error) {
 	cmd := exec.Command("kubectl", "config", "get-contexts", "-o=name")
 
-	var stdout,stderr bytes.Buffer
+	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
 	err := cmd.Run()
 	if err != nil {
-		return nil,errors.New(stderr.String())
+		return nil, errors.New(stderr.String())
 	}
 
 	lines := strings.Split(strings.Trim(stdout.String(), "\n"), "\n")
@@ -46,5 +46,5 @@ func GetContexts() ([]Context,error) {
 		}
 	}
 
-	return contexts,nil
+	return contexts, nil
 }
