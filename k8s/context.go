@@ -8,10 +8,12 @@ import (
 	"strings"
 )
 
+// Context represents a Context in a Kubernetes Cluster
 type Context struct {
 	Name   string
 }
 
+// ContextListItems Transform a list of Contexts to a list of ListItems to show in the Selector
 func ContextListItems(contexts []Context) ([]lib.ListItem) {
 	var items []lib.ListItem
 
@@ -22,6 +24,7 @@ func ContextListItems(contexts []Context) ([]lib.ListItem) {
 	return items
 }
 
+// GetContexts returns all configured Contexts in kubectl
 func GetContexts() ([]Context,error) {
 	cmd := exec.Command("kubectl", "config", "get-contexts", "-o=name")
 

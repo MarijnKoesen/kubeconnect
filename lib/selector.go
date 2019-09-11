@@ -6,11 +6,13 @@ import (
 	"strings"
 )
 
+// ListItem is a Item that can be displayed in the Selector as a selection item
 type ListItem struct {
 	Number int
 	Label string
 }
 
+// SelectFromList Shows a shell based list Selector in which the user can select a ListItem
 func SelectFromList(question string, selectedLabel string, items []ListItem) (int, error) {
 	prompt := promptui.Select{
 		Label: question,

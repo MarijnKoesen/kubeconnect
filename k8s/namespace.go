@@ -8,10 +8,12 @@ import (
 	"strings"
 )
 
+// Namespace represents a Namespace in a Kubernetes cluster
 type Namespace struct {
 	Name   string
 }
 
+// NamespaceListItems Transforms a list of Namespaces to a list of ListItems to show in the Selector
 func NamespaceListItems(namespaces []Namespace) ([]lib.ListItem) {
 	var items []lib.ListItem
 
@@ -22,6 +24,7 @@ func NamespaceListItems(namespaces []Namespace) ([]lib.ListItem) {
 	return items
 }
 
+// GetNamespaces returns all namespaces in a given Context
 func GetNamespaces(context Context) ([]Namespace, error) {
 	cmd := exec.Command("kubectl", "get", "ns", "--context", context.Name);
 
