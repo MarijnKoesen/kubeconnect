@@ -40,7 +40,7 @@ var rootCmd = &cobra.Command{
 			return
 		}
 
-		connect(pod, container)
+		err = connect(pod, container)
 		return
 	},
 }
@@ -159,7 +159,7 @@ func getContainer(pod k8s.Pod) (container string, err error) {
 	return pod.Containers[index], nil
 }
 
-func connect(pod k8s.Pod, container string) {
+func connect(pod k8s.Pod, container string) (err error) {
 	// Get the current working directory.
 	cwd, err := os.Getwd()
 	if err != nil {
