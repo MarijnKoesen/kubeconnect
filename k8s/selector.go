@@ -1,6 +1,8 @@
 package k8s
 
-import "kubeconnect/lib"
+import (
+	"kubeconnect/lib"
+)
 
 // ContextListItems Transform a list of Context to a list of ListItems to show in the Selector
 func ContextListItems(contexts []Context) (items []lib.ListItem) {
@@ -24,6 +26,15 @@ func NamespaceListItems(namespaces []Namespace) (items []lib.ListItem) {
 func PodListItems(pods []Pod) (items []lib.ListItem) {
 	for index, pod := range pods {
 		items = append(items, lib.ListItem{Number: index + 1, Label: pod.Name})
+	}
+
+	return items
+}
+
+// PodContainerListItems Transform a list of Containers of a Pod to a list of ListItems to show in the Selector
+func PodContainerListItems(pod Pod) (items []lib.ListItem) {
+	for index, container := range pod.Containers {
+		items = append(items, lib.ListItem{Number: index + 1, Label: container})
 	}
 
 	return items
