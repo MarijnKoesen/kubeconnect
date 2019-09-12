@@ -34,6 +34,11 @@ var rootCmd = &cobra.Command{
 			return
 		}
 
+		container, err := getContainer(pod)
+		if err != nil {
+			return
+		}
+
 		// Connect
 		// kubectl exec -it --context my-conext --namespace my-namespace my-pod /bin/sh
 
@@ -52,7 +57,7 @@ var rootCmd = &cobra.Command{
 
 		proc, err := os.StartProcess(
 			"/usr/local/bin/kubectl",
-			[]string{"kubectl", "exec", "-it", "--namespace", pod.Namespace, "--context", pod.Context, pod.Name, viper.GetString("shell")}, &pa)
+			[]string{"kubectl", "exec", "-it", "--namespace", pod.Namespace, "--context", pod.Context, "--container", container, pod.Name, viper.GetString("shell")}, &pa)
 
 		if err != nil {
 			return
@@ -161,4 +166,20 @@ func getPod(namespace k8s.Namespace) (pod k8s.Pod, err error) {
 	}
 
 	return pods[index], nil
+}
+
+func getContainer(pod k8s.Pod) (container string, err error) {
+	if len(pod.Containers) == 1 {
+		return pod.Containers[0], nil
+	}
+
+	index, err := lib.SelectFromList(
+		"\033[38;5;3mWhat container do you want to connect to?\033[0m",
+		"Container",
+		k8s.PodContainerListItems(pod))
+	if err != nil {
+		return
+	}
+
+	return pod.Containers[index], nil
 }
