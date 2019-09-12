@@ -12,8 +12,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+// nolint:gochecknoglobals
 var cfgFile, shell string
 
+// nolint:gochecknoglobals
 var rootCmd = &cobra.Command{
 	Use:   "kubeconnect",
 	Short: "Connect to any running pod in k8s with ease",
@@ -54,6 +56,7 @@ func Execute() {
 	}
 }
 
+// nolint:gochecknoinits
 func init() {
 	cobra.OnInitialize(initConfig)
 
@@ -180,7 +183,15 @@ func connect(pod k8s.Pod, container string) (err error) {
 
 	proc, err := os.StartProcess(
 		kubectlPath,
-		[]string{"kubectl", "exec", "-it", "--namespace", pod.Namespace, "--context", pod.Context, "--container", container, pod.Name, viper.GetString("shell")}, &pa)
+		[]string{
+			"kubectl",
+			"exec",
+			"-it",
+			"--namespace", pod.Namespace,
+			"--context", pod.Context,
+			"--container", container,
+			pod.Name,
+			viper.GetString("shell")}, &pa)
 
 	if err != nil {
 		return
@@ -189,5 +200,5 @@ func connect(pod k8s.Pod, container string) (err error) {
 	// Wait until user exits the shell
 	_, err = proc.Wait()
 
-	return
+	return err
 }

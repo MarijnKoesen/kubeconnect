@@ -8,6 +8,7 @@ import (
 )
 
 func runCmd(arg ...string) (out string, err error) {
+	// nolint:gosec
 	cmd := exec.Command("kubectl", arg...)
 
 	var stdout, stderr bytes.Buffer
