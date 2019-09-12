@@ -1,46 +1,25 @@
 package k8s
 
 import (
-	"bytes"
-	"errors"
-	"kubeconnect/lib"
-	"os/exec"
 	"strings"
 )
 
 // Context represents a Context in a Kubernetes Cluster
 type Context struct {
-	Name string
-}
-
-// ContextListItems Transform a list of Contexts to a list of ListItems to show in the Selector
-func ContextListItems(contexts []Context) (items []lib.ListItem) {
-	for index, context := range contexts {
-		items = append(items, lib.ListItem{Number: index + 1, Label: context.Name})
-	}
-
-	return
+	name string
 }
 
 // GetContexts returns all configured Contexts in kubectl
 func GetContexts() (contexts []Context, err error) {
-	cmd := exec.Command("kubectl", "config", "get-contexts", "-o=name")
-
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err = cmd.Run()
+	out, err := runCmd("config", "get-contexts", "-o", "name")
 	if err != nil {
-		return nil, errors.New(stderr.String())
+		return
 	}
 
-	lines := strings.Split(strings.Trim(stdout.String(), "\n"), "\n")
-
-	for _, name := range lines {
-		if name != "NAME" {
-			contexts = append(contexts, Context{Name: name})
-		}
+	for _, name := range strings.Split(out, "\n") {
+		contexts = append(contexts, Context{
+			name: name,
+		})
 	}
 
 	return
