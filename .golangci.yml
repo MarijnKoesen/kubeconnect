@@ -1,0 +1,9 @@
+linters-settings:
+  golint:
+    min-confidence: 1
+
+linters:
+  enable-all: true
+
+issues:
+  exclude-use-default: false

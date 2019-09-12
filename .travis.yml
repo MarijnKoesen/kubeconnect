@@ -10,5 +10,12 @@ env:
 # Disable the old go get way travis will still automatically do if you use 'language: go'
 install: true
 
+# Anything in before_script that returns a nonzero exit code will flunk the
+# build and immediately stop. It's sorta like having set -e enabled in bash.
+# Make sure golangci-lint is vendored.
+before_script:
+  - go install github.com/golangci/golangci-lint/cmd/golangci-lint
+
 script:
+  - golangci-lint run
   - go build
