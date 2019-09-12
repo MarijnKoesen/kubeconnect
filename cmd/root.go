@@ -5,6 +5,7 @@ import (
 	"kubeconnect/k8s"
 	"kubeconnect/lib"
 	"os"
+	"os/exec"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -39,33 +40,7 @@ var rootCmd = &cobra.Command{
 			return
 		}
 
-		// Connect
-		// kubectl exec -it --context my-conext --namespace my-namespace my-pod /bin/sh
-
-		// Get the current working directory.
-		cwd, err := os.Getwd()
-		if err != nil {
-			return
-		}
-
-		// Transfer stdin, stdout, and stderr to the new process
-		// and also set target directory for the shell to start in.
-		pa := os.ProcAttr{
-			Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
-			Dir:   cwd,
-		}
-
-		proc, err := os.StartProcess(
-			"/usr/local/bin/kubectl",
-			[]string{"kubectl", "exec", "-it", "--namespace", pod.Namespace, "--context", pod.Context, "--container", container, pod.Name, viper.GetString("shell")}, &pa)
-
-		if err != nil {
-			return
-		}
-
-		// Wait until user exits the shell
-		_, err = proc.Wait()
-
+		connect(pod, container)
 		return
 	},
 }
@@ -182,4 +157,37 @@ func getContainer(pod k8s.Pod) (container string, err error) {
 	}
 
 	return pod.Containers[index], nil
+}
+
+func connect(pod k8s.Pod, container string) {
+	// Get the current working directory.
+	cwd, err := os.Getwd()
+	if err != nil {
+		return
+	}
+
+	// Transfer stdin, stdout, and stderr to the new process
+	// and also set target directory for the shell to start in.
+	pa := os.ProcAttr{
+		Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
+		Dir:   cwd,
+	}
+
+	kubectlPath, err := exec.LookPath("kubectl")
+	if err != nil {
+		return
+	}
+
+	proc, err := os.StartProcess(
+		kubectlPath,
+		[]string{"kubectl", "exec", "-it", "--namespace", pod.Namespace, "--context", pod.Context, "--container", container, pod.Name, viper.GetString("shell")}, &pa)
+
+	if err != nil {
+		return
+	}
+
+	// Wait until user exits the shell
+	_, err = proc.Wait()
+
+	return
 }
