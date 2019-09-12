@@ -102,6 +102,7 @@ func initConfig() {
 		viper.SetConfigName(".kubeconnect")
 	}
 
+	viper.SetEnvPrefix("KUBECONNECT")
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
