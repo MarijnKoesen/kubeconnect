@@ -1,47 +1,29 @@
 package k8s
 
 import (
-	"bytes"
-	"errors"
-	"kubeconnect/lib"
-	"os/exec"
+	"fmt"
 	"strings"
 )
 
 // Namespace represents a Namespace in a Kubernetes cluster
 type Namespace struct {
-	Name string
+	name, context string
 }
 
-// NamespaceListItems Transforms a list of Namespaces to a list of ListItems to show in the Selector
-func NamespaceListItems(namespaces []Namespace) (items []lib.ListItem) {
-	for index, namespace := range namespaces {
-		items = append(items, lib.ListItem{Number: index + 1, Label: namespace.Name})
-	}
-
-	return
-}
+const nsTpl = "{{range .items}}{{.metadata.name}} {{end}}"
 
 // GetNamespaces returns all namespaces in a given Context
-func GetNamespaces(context Context) (namespaces []Namespace, err error) {
-	cmd := exec.Command("kubectl", "get", "ns", "--context", context.Name)
-
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err = cmd.Run()
+func (c *Context) GetNamespaces() (namespaces []Namespace, err error) {
+	out, err := runCmd("get", "ns", "--context", c.name, "-o", fmt.Sprintf("go-template=%s", nsTpl))
 	if err != nil {
-		return nil, errors.New(stderr.String())
+		return
 	}
 
-	lines := strings.Split(strings.Trim(stdout.String(), "\n"), "\n")
-
-	for _, line := range lines {
-		var name = strings.Split(line, " ")[0]
-		if name != "NAME" {
-			namespaces = append(namespaces, Namespace{Name: name})
-		}
+	for _, name := range strings.Fields(out) {
+		namespaces = append(namespaces, Namespace{
+			name:    name,
+			context: c.name,
+		})
 	}
 
 	return

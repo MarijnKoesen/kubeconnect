@@ -11,17 +11,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var cfgFile, shell string
 
 var rootCmd = &cobra.Command{
 	Use:   "kubeconnect",
 	Short: "Connect to any running pod in k8s with ease",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
@@ -35,7 +29,7 @@ to quickly create a Cobra application.`,
 			return
 		}
 
-		pod, err := getPod(context, namespace)
+		pod, err := getPod(namespace)
 		if err != nil {
 			return
 		}
@@ -58,7 +52,7 @@ to quickly create a Cobra application.`,
 
 		proc, err := os.StartProcess(
 			"/usr/local/bin/kubectl",
-			[]string{"kubectl", "exec", "-it", "--namespace", namespace.Name, "--context", context.Name, pod.Name, "/bin/sh"}, &pa)
+			[]string{"kubectl", "exec", "-it", "--namespace", pod.Namespace, "--context", pod.Context, pod.Name, viper.GetString("shell")}, &pa)
 
 		if err != nil {
 			return
@@ -83,15 +77,11 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kubeconnect.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().StringVar(&shell, "shell", "/bin/sh", "Shell to be used")
+	if err := viper.BindPFlag("shell", rootCmd.PersistentFlags().Lookup("shell")); err != nil {
+		panic(err)
+	}
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -120,10 +110,10 @@ func initConfig() {
 	}
 }
 
-func getContext() (k8s.Context, error) {
+func getContext() (context k8s.Context, err error) {
 	contexts, err := k8s.GetContexts()
 	if err != nil {
-		return k8s.Context{}, err
+		return
 	}
 
 	index, err := lib.SelectFromList(
@@ -132,16 +122,16 @@ func getContext() (k8s.Context, error) {
 		k8s.ContextListItems(contexts))
 
 	if err != nil {
-		return k8s.Context{}, err
+		return
 	}
 
 	return contexts[index], nil
 }
 
-func getNamespace(context k8s.Context) (k8s.Namespace, error) {
-	namespaces, err := k8s.GetNamespaces(context)
+func getNamespace(context k8s.Context) (namespace k8s.Namespace, err error) {
+	namespaces, err := context.GetNamespaces()
 	if err != nil {
-		return k8s.Namespace{}, err
+		return
 	}
 
 	index, err := lib.SelectFromList(
@@ -149,16 +139,16 @@ func getNamespace(context k8s.Context) (k8s.Namespace, error) {
 		"Namespace",
 		k8s.NamespaceListItems(namespaces))
 	if err != nil {
-		return k8s.Namespace{}, err
+		return
 	}
 
 	return namespaces[index], nil
 }
 
-func getPod(context k8s.Context, namespace k8s.Namespace) (k8s.Pod, error) {
-	pods, err := k8s.GetPods(context, namespace)
+func getPod(namespace k8s.Namespace) (pod k8s.Pod, err error) {
+	pods, err := namespace.GetPods()
 	if err != nil {
-		return k8s.Pod{}, err
+		return
 	}
 
 	index, err := lib.SelectFromList(
@@ -166,7 +156,7 @@ func getPod(context k8s.Context, namespace k8s.Namespace) (k8s.Pod, error) {
 		"Pod",
 		k8s.PodListItems(pods))
 	if err != nil {
-		return k8s.Pod{}, err
+		return
 	}
 
 	return pods[index], nil
