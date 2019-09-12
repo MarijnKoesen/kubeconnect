@@ -14,32 +14,29 @@ type Namespace struct {
 }
 
 // NamespaceListItems Transforms a list of Namespaces to a list of ListItems to show in the Selector
-func NamespaceListItems(namespaces []Namespace) []lib.ListItem {
-	var items []lib.ListItem
-
+func NamespaceListItems(namespaces []Namespace) (items []lib.ListItem) {
 	for index, namespace := range namespaces {
 		items = append(items, lib.ListItem{Number: index + 1, Label: namespace.Name})
 	}
 
-	return items
+	return
 }
 
 // GetNamespaces returns all namespaces in a given Context
-func GetNamespaces(context Context) ([]Namespace, error) {
+func GetNamespaces(context Context) (namespaces []Namespace, err error) {
 	cmd := exec.Command("kubectl", "get", "ns", "--context", context.Name)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
 		return nil, errors.New(stderr.String())
 	}
 
 	lines := strings.Split(strings.Trim(stdout.String(), "\n"), "\n")
 
-	var namespaces []Namespace
 	for _, line := range lines {
 		var name = strings.Split(line, " ")[0]
 		if name != "NAME" {
@@ -47,5 +44,5 @@ func GetNamespaces(context Context) ([]Namespace, error) {
 		}
 	}
 
-	return namespaces, nil
+	return
 }

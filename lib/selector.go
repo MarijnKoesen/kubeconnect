@@ -2,8 +2,9 @@ package lib
 
 import (
 	"errors"
-	"github.com/manifoldco/promptui"
 	"strings"
+
+	"github.com/manifoldco/promptui"
 )
 
 // ListItem is a Item that can be displayed in the Selector as a selection item

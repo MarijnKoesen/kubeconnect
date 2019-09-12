@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-homedir"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"kubeconnect/k8s"
 	"kubeconnect/lib"
 	"os"
+
+	"github.com/mitchellh/go-homedir"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var cfgFile string
@@ -23,22 +24,19 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		context, err := getContext()
 		if err != nil {
-			fmt.Print(err.Error())
 			return
 		}
 
 		namespace, err := getNamespace(context)
 		if err != nil {
-			fmt.Print(err.Error())
 			return
 		}
 
 		pod, err := getPod(context, namespace)
 		if err != nil {
-			fmt.Print(err.Error())
 			return
 		}
 
@@ -48,7 +46,7 @@ to quickly create a Cobra application.`,
 		// Get the current working directory.
 		cwd, err := os.Getwd()
 		if err != nil {
-			panic(err)
+			return
 		}
 
 		// Transfer stdin, stdout, and stderr to the new process
@@ -63,14 +61,13 @@ to quickly create a Cobra application.`,
 			[]string{"kubectl", "exec", "-it", "--namespace", namespace.Name, "--context", context.Name, pod.Name, "/bin/sh"}, &pa)
 
 		if err != nil {
-			panic(err)
+			return
 		}
 
 		// Wait until user exits the shell
 		_, err = proc.Wait()
-		if err != nil {
-			panic(err)
-		}
+
+		return
 	},
 }
 
