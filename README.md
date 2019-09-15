@@ -10,6 +10,17 @@ Don't you know the exact namespace, the pod name, or the name of that one contai
 
 ## Installation
 
+### OSX 
+
+Installing on OSX can be done using brew:
+
+```
+$ brew tap marijnkoesen/kubeconnect
+$ brew install kubeconnect
+```
+
+### Others
+
 Download one of the releases from the [release page](https://github.com/MarijnKoesen/kubeconnect/releases).
 
 Extract the archive and run the `kubeconnect` command.
