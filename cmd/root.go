@@ -17,8 +17,9 @@ var cfgFile, shell string
 
 // nolint:gochecknoglobals
 var rootCmd = &cobra.Command{
-	Use:   "kubeconnect",
-	Short: "Connect to any running pod in k8s with ease",
+	Use:     "kubeconnect",
+	Version: "0.1.2",
+	Short:   "Connect to any running pod in k8s with ease",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
