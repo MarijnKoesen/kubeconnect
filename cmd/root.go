@@ -199,6 +199,7 @@ func connect(pod k8s.Pod, container string) (err error) {
 		pod.Name,
 		shell}
 
+	fmt.Println("Connecting using: " + strings.Join(cmd, " "))
 	proc, err := os.StartProcess(kubectlPath, cmd, &pa)
 
 	if err != nil {
