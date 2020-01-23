@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func runCmd(arg ...string) (out string, err error) {
+func RunCmd(arg ...string) (out string, err error) {
 	// nolint:gosec
 	cmd := exec.Command("kubectl", arg...)
 

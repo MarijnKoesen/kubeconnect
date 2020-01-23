@@ -26,7 +26,7 @@ Download one of the releases from the [release page](https://github.com/MarijnKo
 Extract the archive and run the `kubeconnect` command.
 
 
-## Building from source
+### Building from source
 
 Building from source is as simple as a `go build`
 
@@ -36,3 +36,37 @@ $ cd kubeconnect
 $ go build
 $ ./kubeconnect
 ```
+
+
+## Specifying the shell to be used
+
+By default `kubeconnect` will try to use the best shell available in the pod. It does this by first making a connecting 
+to the pod and checking what shells are available.
+
+By default kubeconnect tries to use the following shells, in this order:
+
+```
+zsh
+ksh
+bash
+sh
+```
+
+Note that it does not have to be a full path, kubeconnect will figure that out by itself.
+
+If you want to connect to a different shell, you can specify the shell you want in the `~/.kubeconnect.yaml` 
+configuration. 
+
+You can see an example in the [/.kubeconnect.yaml-dist](/.kubeconnect.yaml-dist?raw=true) file.
+
+```
+shell: zsh ksh bash sh
+```
+
+Alternatively you can set it via an environment variable:
+
+```
+$ KUBECONNECT_SHELL="fish sh" kubeconnect
+```
+
+When the shell is a single full path, the lookup will not be done and the shell will be used as-is.

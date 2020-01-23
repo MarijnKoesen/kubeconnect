@@ -11,7 +11,7 @@ type Context struct {
 
 // GetContexts returns all configured Contexts in kubectl
 func GetContexts() (contexts []Context, err error) {
-	out, err := runCmd("config", "get-contexts", "-o", "name")
+	out, err := RunCmd("config", "get-contexts", "-o", "name")
 	if err != nil {
 		return
 	}

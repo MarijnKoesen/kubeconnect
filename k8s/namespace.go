@@ -14,7 +14,7 @@ const nsTpl = "{{range .items}}{{.metadata.name}} {{end}}"
 
 // GetNamespaces returns all namespaces in a given Context
 func (c *Context) GetNamespaces() (namespaces []Namespace, err error) {
-	out, err := runCmd("get", "ns", "--context", c.name, "-o", fmt.Sprintf("go-template=%s", nsTpl))
+	out, err := RunCmd("get", "ns", "--context", c.name, "-o", fmt.Sprintf("go-template=%s", nsTpl))
 	if err != nil {
 		return
 	}

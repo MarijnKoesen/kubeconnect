@@ -15,7 +15,7 @@ const podTpl = "{{range .items}}{{.metadata.name}} {{range .spec.containers}}{{ 
 
 // GetPods returns all Pods in a given Namespace and Context
 func (n *Namespace) GetPods() (pods []Pod, err error) {
-	out, err := runCmd(
+	out, err := RunCmd(
 		"get", "pod",
 		"--context", n.context,
 		"--namespace", n.name,

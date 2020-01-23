@@ -6,6 +6,8 @@ import (
 	"kubeconnect/lib"
 	"os"
 	"os/exec"
+	"regexp"
+	"strings"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -62,7 +64,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kubeconnect.yaml)")
-	rootCmd.PersistentFlags().StringVar(&shell, "shell", "/bin/sh", "Shell to be used")
+	rootCmd.PersistentFlags().StringVar(&shell, "shell", "zsh ksh bash sh", "Shell to be used")
 	if err := viper.BindPFlag("shell", rootCmd.PersistentFlags().Lookup("shell")); err != nil {
 		panic(err)
 	}
@@ -182,17 +184,22 @@ func connect(pod k8s.Pod, container string) (err error) {
 		return
 	}
 
-	proc, err := os.StartProcess(
-		kubectlPath,
-		[]string{
-			"kubectl",
-			"exec",
-			"-it",
-			"--namespace", pod.Namespace,
-			"--context", pod.Context,
-			"--container", container,
-			pod.Name,
-			viper.GetString("shell")}, &pa)
+	shell, err := getShell(pod, container)
+	if err != nil {
+		return
+	}
+
+	cmd := []string{
+		"kubectl",
+		"exec",
+		"-it",
+		"--namespace", pod.Namespace,
+		"--context", pod.Context,
+		"--container", container,
+		pod.Name,
+		shell}
+
+	proc, err := os.StartProcess(kubectlPath, cmd, &pa)
 
 	if err != nil {
 		return
@@ -202,4 +209,32 @@ func connect(pod k8s.Pod, container string) (err error) {
 	_, err = proc.Wait()
 
 	return err
+}
+
+func getShell(pod k8s.Pod, container string) (shell string, err error) {
+	shellList := viper.GetString("shell")
+
+	if regexp.MustCompile(`^/[^ ]+[a-z]+`).MatchString(shellList) {
+		shell = shellList
+		return
+	}
+
+	// Make sure we always have a valid fallback to sh
+	fmt.Println("Looking up the shell to use from: " + shellList)
+	shellList += " sh"
+	cmd := "command -v " + strings.Join(strings.Fields(shellList), " || command -v ")
+
+	shell, err = k8s.RunCmd("" +
+		"exec",
+		"-it",
+		"--context", pod.Context,
+		"--namespace", pod.Namespace,
+		"--container", container,
+		pod.Name,
+		"--",
+		"sh",
+		"-c",
+		cmd)
+
+	return
 }
