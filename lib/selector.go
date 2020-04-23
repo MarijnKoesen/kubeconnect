@@ -2,6 +2,7 @@ package lib
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/manifoldco/promptui"
@@ -25,7 +26,7 @@ func SelectFromList(question string, selectedLabel string, items []ListItem) (in
 		},
 		Searcher: func(input string, index int) bool {
 			context := items[index]
-			name := strings.Replace(string(context.Number)+" "+strings.ToLower(context.Label), " ", "", -1)
+			name := strings.Replace(strconv.Itoa(context.Number)+" "+strings.ToLower(context.Label), " ", "", -1)
 			input = strings.Replace(strings.ToLower(input), " ", "", -1)
 
 			return strings.Contains(name, input)
