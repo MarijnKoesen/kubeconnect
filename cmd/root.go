@@ -17,10 +17,13 @@ import (
 // nolint:gochecknoglobals
 var cfgFile, shell string
 
+// Version compiled
+var Version = "dev"
+
 // nolint:gochecknoglobals
 var rootCmd = &cobra.Command{
 	Use:     "kubeconnect",
-	Version: "0.1.3",
+	Version: Version,
 	Short:   "Connect to any running pod in k8s with ease",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
@@ -59,7 +62,6 @@ func Execute() {
 	}
 }
 
-// nolint:gochecknoinits
 func init() {
 	cobra.OnInitialize(initConfig)
 
