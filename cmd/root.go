@@ -14,13 +14,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-// nolint:gochecknoglobals
 var cfgFile, shell string
 
 // Version compiled
 var Version = "dev"
 
-// nolint:gochecknoglobals
 var rootCmd = &cobra.Command{
 	Use:     "kubeconnect",
 	Version: Version,
@@ -227,7 +225,7 @@ func getShell(pod k8s.Pod, container string) (shell string, err error) {
 	shellList += " sh"
 	cmd := "command -v " + strings.Join(strings.Fields(shellList), " || command -v ")
 
-	shell, err = k8s.RunCmd("" +
+	shell, err = k8s.RunCmd(""+
 		"exec",
 		"-it",
 		"--context", pod.Context,
